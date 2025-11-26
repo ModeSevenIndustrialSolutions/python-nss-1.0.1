@@ -1,6 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * SPDX-License-Identifier: MPL-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2010-2025 python-nss-ng contributors
+ */
 
 // FIXME: sometimes in the API dist_name is used and sometimes ca_name, make consistent.
 // FIXME: PyIntObjects represent their value as a long, but in many places we declared their C representation as
@@ -199,14 +202,14 @@ ssl_version_to_repr_kind(unsigned int major, unsigned int minor,
             break;
         default:
             PyErr_Format(PyExc_ValueError,
-                         "Verson %d.%d has unkown minor version",
+                         "Version %d.%d has unknown minor version",
                          major, minor);
             return NULL;
         }
         break;
     default:
         PyErr_Format(PyExc_ValueError,
-                     "Verson %d.%d has unkown major version",
+                     "Version %d.%d has unknown major version",
                      major, minor);
         return NULL;
     }
@@ -463,7 +466,7 @@ socket handshake, a crash is likely to occur when the first I/O\n\
 operation is done on the socket after it is imported into SSL.\n\
 \n\
 .. [1] See the \"SSL Version Range API\" section in the module\n\
-       documentation for updated recomendations on protocol selection.\n\
+       documentation for updated recommendations on protocol selection.\n\
 ");
 
 static PyObject *
@@ -1217,7 +1220,7 @@ SSLSocket_config_secure_server(SSLSocket *self, PyObject *args)
 }
 
 PyDoc_STRVAR(SSLSocket_get_peer_certificate_doc,
-"get_peer_certificate() -> Certficate\n\
+"get_peer_certificate() -> Certificate\n\
 \n\
 `SSLSocket.get_peer_certificate()` is used by certificate\n\
 authentication and bad-certificate callback functions to obtain the\n\
@@ -1249,7 +1252,7 @@ SSLSocket_get_peer_certificate(SSLSocket *self, PyObject *args)
 }
 
 PyDoc_STRVAR(SSLSocket_get_certificate_doc,
-"get_certificate() -> Certficate\n\
+"get_certificate() -> Certificate\n\
 \n\
 Returns the certificate associated with the socket or\n\
 None if not previously set.\n\
@@ -4342,8 +4345,6 @@ enabled at the time of the call, the same way\n\
 to keep the set of enabled versions contiguous.\n\
 ");
 
-#if PY_MAJOR_VERSION >= 3
-
 static struct PyModuleDef module_def = {
     PyModuleDef_HEAD_INIT,
     NSS_SSL_MODULE_NAME,        /* m_name */
@@ -4355,9 +4356,6 @@ static struct PyModuleDef module_def = {
     NULL,                       /* m_clear */
     NULL                        /* m_free */
 };
-
-#else /* PY_MAOR_VERSION < 3 */
-#endif /* PY_MAJOR_VERSION */
 
 MOD_INIT(ssl)
 {
@@ -4376,11 +4374,7 @@ MOD_INIT(ssl)
 
     SSLSocketType.tp_base = &SocketType;
 
-#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&module_def);
-#else
-    m = Py_InitModule3(NSS_SSL_MODULE_NAME, module_methods, module_doc);
-#endif
 
     if (m == NULL) {
         return MOD_ERROR_VAL;
@@ -4716,13 +4710,6 @@ if (_AddIntConstantWithLookup(m, #constant, constant, \
 #ifdef TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256
     ExportConstant(TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256);
     ExportConstant(TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256);
-#endif
-
-    /* TLS 1.3 cipher suites */
-#ifdef TLS_AES_128_GCM_SHA256
-    ExportConstant(TLS_AES_128_GCM_SHA256);
-    ExportConstant(TLS_AES_256_GCM_SHA384);
-    ExportConstant(TLS_CHACHA20_POLY1305_SHA256);
 #endif
 
     /* Netscape "experimental" cipher suites. */

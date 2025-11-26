@@ -1,6 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * SPDX-License-Identifier: MPL-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2010-2025 python-nss-ng contributors
+ */
 
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
@@ -183,11 +186,7 @@ set_nspr_error(const char *format, ...)
     PyObject *exception_obj = NULL;
 
     if (format) {
-#ifdef HAVE_STDARG_PROTOTYPES
         va_start(vargs, format);
-#else
-        va_start(vargs);
-#endif
         error_message = PyUnicode_FromFormatV(format, vargs);
         va_end(vargs);
     }
@@ -219,11 +218,7 @@ set_cert_verify_error(unsigned long usages, PyObject *log, const char *format, .
     PyObject *exception_obj = NULL;
 
     if (format) {
-#ifdef HAVE_STDARG_PROTOTYPES
         va_start(vargs, format);
-#else
-        va_start(vargs);
-#endif
         error_message = PyUnicode_FromFormatV(format, vargs);
         va_end(vargs);
     }
@@ -269,6 +264,8 @@ io_get_nspr_error_string(PyObject *self, PyObject *args)
     int err_num;
     NSPRErrorDesc const *error_desc = NULL;
 
+    (void)self;  /* Unused parameter */
+
     if (!PyArg_ParseTuple(args, "i:get_nspr_error_string", &err_num)) {
         return NULL;
     }
@@ -283,7 +280,7 @@ io_get_nspr_error_string(PyObject *self, PyObject *args)
 static PyMethodDef
 module_methods[] = {
     {"get_nspr_error_string", io_get_nspr_error_string, METH_VARARGS, io_get_nspr_error_string_doc},
-    {NULL, NULL}            /* Sentinel */
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 static PyObject *
@@ -294,7 +291,7 @@ init_py_nspr_errors(PyObject *module)
     PyObject *error_str = NULL;
     int i;
 
-    /* Load and intialize NSPR error descriptions */
+    /* Load and initialize NSPR error descriptions */
     if (init_nspr_errors() != PR_SUCCESS)
         return NULL;
 
@@ -411,7 +408,7 @@ static PyMemberDef NSPRError_members[] = {
 
     {"error_message", T_OBJECT, offsetof(NSPRError, error_message), READONLY,
      PyDoc_STR("error message specific to this error")},
-    {NULL}  /* Sentinel */
+    {NULL, 0, 0, 0, NULL}  /* Sentinel */
 };
 
 /* ============================== Class Methods ============================= */
@@ -474,12 +471,12 @@ PyDoc_STRVAR(NSPRError_doc,
         NSS or NSPR error value, if None get current error\n\
 \n\
 Exception object (derived from StandardException), raised when an\n\
-NSS or NSPR error occurs. The error model in python-nss is anytime\n\
-a NSS or NSPR C function returns an error the python-nss binding\n\n\
+NSS or NSPR error occurs. The error model in python-nss-ng is anytime\n\
+a NSS or NSPR C function returns an error the python-nss-ng binding\n\n\
 raises a NSPRError exception.\n\
 \n\
 Raised internally, there should be no need to raise this exception\n\
-from with a Python program using python-nss.\n\
+from with a Python program using python-nss-ng.\n\
 \n\
 The error_message is an optional string detailing the specifics\n\
 of an error.\n\
@@ -547,43 +544,16 @@ NSPRError_init(NSPRError *self, PyObject *args, PyObject *kwds)
 
 static PyTypeObject NSPRErrorType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "nss.error.NSPRError",			/* tp_name */
-    sizeof(NSPRError),				/* tp_basicsize */
-    0,						/* tp_itemsize */
-    (destructor)NSPRError_dealloc,		/* tp_dealloc */
-    0,						/* tp_print */
-    0,						/* tp_getattr */
-    0,						/* tp_setattr */
-    0,						/* tp_compare */
-    0,						/* tp_repr */
-    0,						/* tp_as_number */
-    0,						/* tp_as_sequence */
-    0,						/* tp_as_mapping */
-    0,						/* tp_hash */
-    0,						/* tp_call */
-    (reprfunc)NSPRError_str,			/* tp_str */
-    0,						/* tp_getattro */
-    0,						/* tp_setattro */
-    0,						/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC, /* tp_flags */
-    NSPRError_doc,				/* tp_doc */
-    (traverseproc)NSPRError_traverse,		/* tp_traverse */
-    (inquiry)NSPRError_clear,			/* tp_clear */
-    0,						/* tp_richcompare */
-    0,						/* tp_weaklistoffset */
-    0,						/* tp_iter */
-    0,						/* tp_iternext */
-    0,						/* tp_methods */
-    NSPRError_members,				/* tp_members */
-    0,						/* tp_getset */
-    0,						/* tp_base */
-    0,						/* tp_dict */
-    0,						/* tp_descr_get */
-    0,						/* tp_descr_set */
-    0,						/* tp_dictoffset */
-    (initproc)NSPRError_init,			/* tp_init */
-    0,						/* tp_alloc */
-    0,						/* tp_new */
+    .tp_name = "nss.error.NSPRError",
+    .tp_basicsize = sizeof(NSPRError),
+    .tp_dealloc = (destructor)NSPRError_dealloc,
+    .tp_str = (reprfunc)NSPRError_str,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
+    .tp_doc = NSPRError_doc,
+    .tp_traverse = (traverseproc)NSPRError_traverse,
+    .tp_clear = (inquiry)NSPRError_clear,
+    .tp_members = NSPRError_members,
+    .tp_init = (initproc)NSPRError_init,
 };
 
 /* ========================================================================== */
@@ -597,8 +567,8 @@ static PyMemberDef CertVerifyError_members[] = {
     {"usages", T_UINT, offsetof(CertVerifyError, usages), READONLY,
      PyDoc_STR("usages returned by NSS")},
     {"log", T_OBJECT, offsetof(CertVerifyError, log), READONLY,
-     PyDoc_STR("verifcation log, see `CertVerifyLog`")},
-    {NULL}  /* Sentinel */
+     PyDoc_STR("verification log, see `CertVerifyLog`")},
+    {NULL, 0, 0, 0, NULL}  /* Sentinel */
 };
 
 /* ============================== Class Methods ============================= */
@@ -672,7 +642,7 @@ Exception object (derived from NSPRError), raised when an\n\
 error occurs during certificate verification.\n\
 \n\
 Raised internally, there should be no need to raise this exception\n\
-from with a Python program using python-nss.\n\
+from with a Python program using python-nss-ng.\n\
 \n\
 Certificate verification presents a problem for the normal error\n\
 handling model whereby any error returned from an underlying C\n\
@@ -688,14 +658,14 @@ model of always raising an exception on an error return some other\n\
 mechanism is needed to return the extra information. The solution is\n\
 to embed the information which normally would have been in the return\n\
 values in the exception object where it can be queried. The\n\
-CertVerifyError contails the returned usages bitmask and optionally\n\
+CertVerifyError contains the returned usages bitmask and optionally\n\
 the `CertVerifyLog` verification log object if requested.\n\
 \n\
-In addtion to the attributes in a `NSPRError` a CertVerifyError contains\n\
+In addition to the attributes in a `NSPRError` a CertVerifyError contains\n\
 the following attributes:\n\
 \n\
     usages\n\
-        The retured usages bitmask (unsigned int) from the Certificate\n\
+        The returned usages bitmask (unsigned int) from the Certificate\n\
         verification function.\n\
     log\n\
         The (optional) `CertVerifyLog` object which contains the\n\
@@ -761,43 +731,17 @@ CertVerifyError_init(CertVerifyError *self, PyObject *args, PyObject *kwds)
 
 static PyTypeObject CertVerifyErrorType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "nss.error.CertVerifyError",		/* tp_name */
-    sizeof(CertVerifyError),			/* tp_basicsize */
-    0,						/* tp_itemsize */
-    (destructor)CertVerifyError_dealloc,	/* tp_dealloc */
-    0,						/* tp_print */
-    0,						/* tp_getattr */
-    0,						/* tp_setattr */
-    0,						/* tp_compare */
-    0,						/* tp_repr */
-    0,						/* tp_as_number */
-    0,						/* tp_as_sequence */
-    0,						/* tp_as_mapping */
-    0,						/* tp_hash */
-    0,						/* tp_call */
-    (reprfunc)CertVerifyError_str,		/* tp_str */
-    0,						/* tp_getattro */
-    0,						/* tp_setattro */
-    0,						/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
-    CertVerifyError_doc,			/* tp_doc */
-    (traverseproc)CertVerifyError_traverse,	/* tp_traverse */
-    (inquiry)CertVerifyError_clear,		/* tp_clear */
-    0,						/* tp_richcompare */
-    0,						/* tp_weaklistoffset */
-    0,						/* tp_iter */
-    0,						/* tp_iternext */
-    0,						/* tp_methods */
-    CertVerifyError_members,			/* tp_members */
-    0,						/* tp_getset */
-    &NSPRErrorType,				/* tp_base */
-    0,						/* tp_dict */
-    0,						/* tp_descr_get */
-    0,						/* tp_descr_set */
-    0,						/* tp_dictoffset */
-    (initproc)CertVerifyError_init,		/* tp_init */
-    0,						/* tp_alloc */
-    0,						/* tp_new */
+    .tp_name = "nss.error.CertVerifyError",
+    .tp_basicsize = sizeof(CertVerifyError),
+    .tp_dealloc = (destructor)CertVerifyError_dealloc,
+    .tp_str = (reprfunc)CertVerifyError_str,
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,
+    .tp_doc = CertVerifyError_doc,
+    .tp_traverse = (traverseproc)CertVerifyError_traverse,
+    .tp_clear = (inquiry)CertVerifyError_clear,
+    .tp_members = CertVerifyError_members,
+    .tp_base = &NSPRErrorType,
+    .tp_init = (initproc)CertVerifyError_init,
 };
 
 
@@ -819,8 +763,6 @@ PyDoc_STRVAR(module_doc,
 manipulate them.\n\
 ");
 
-#if PY_MAJOR_VERSION >= 3
-
 static struct PyModuleDef module_def = {
     PyModuleDef_HEAD_INIT,
     NSS_ERROR_MODULE_NAME,      /* m_name */
@@ -833,20 +775,13 @@ static struct PyModuleDef module_def = {
     NULL                        /* m_free */
 };
 
-#else /* PY_MAOR_VERSION < 3 */
-#endif /* PY_MAJOR_VERSION */
-
 MOD_INIT(error)
 {
     PyObject *m;
     PyObject *py_error_doc = NULL;
     PyObject *py_module_doc = NULL;
 
-#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&module_def);
-#else
-    m = Py_InitModule3(NSS_ERROR_MODULE_NAME, module_methods, module_doc);
-#endif
 
     if (m == NULL) {
         return MOD_ERROR_VAL;

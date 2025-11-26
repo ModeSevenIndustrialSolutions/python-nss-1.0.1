@@ -1,6 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ * SPDX-License-Identifier: MPL-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2010-2025 python-nss-ng contributors
+ */
 
 // FIXME: add detail to each set_nspr_error()
 // FIXME: should nspr exception be derived from IOError? Note our detail is IOError's filename
@@ -195,7 +198,7 @@ NetworkAddress_init_from_address_string(NetworkAddress *self, const char *addr_s
     /*
      * NSS WART
      *
-     * The inerface presented by PR_GetAddrInfoByName is so crippled
+     * The interface presented by PR_GetAddrInfoByName is so crippled
      * that it's impossible to specify many of the selection criteria
      * which give getaddrinfo the flexibility it's designers
      * intended. As a simple example it's impossible to specify you
@@ -412,8 +415,8 @@ NetworkAddress_set_from_string(NetworkAddress *self, PyObject *args, PyObject *k
 
 static PyMethodDef
 NetworkAddress_methods[] = {
-    {"set_from_string", (PyCFunction)NetworkAddress_set_from_string, METH_VARARGS|METH_KEYWORDS, NetworkAddress_set_from_string_doc},
-    {NULL, NULL}  /* Sentinel */
+    {"set_from_string", (PyCFunction)(void(*)(void))NetworkAddress_set_from_string, METH_VARARGS|METH_KEYWORDS, NetworkAddress_set_from_string_doc},
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 /* =========================== Class Construction =========================== */
@@ -519,7 +522,7 @@ PR_IpAddrV4Mapped\n\
     Use IPv4 mapped address\n\
 \n\
 The optional port argument sets the port number in the NetworkAddress object.\n\
-The port number may be modfied later by assigning to the port attribute.\n\
+The port number may be modified later by assigning to the port attribute.\n\
 \n\
 Example::\n\
     \n\
@@ -633,11 +636,14 @@ NetworkAddress_str(NetworkAddress *self)
     switch(PR_NetAddrFamily(&self->pr_netaddr)) {
     case PR_AF_INET:
         result = PyUnicode_FromFormat("%U:%d", unicode_addr, PR_ntohs(self->pr_netaddr.inet.port));
+        break;
     case PR_AF_INET6:
         result = PyUnicode_FromFormat("[%U]:%d", unicode_addr, PR_ntohs(self->pr_netaddr.ipv6.port));
+        break;
     default:
         result = unicode_addr;
         Py_INCREF(unicode_addr);
+        break;
     }
 
     Py_DECREF(unicode_addr);
@@ -1165,9 +1171,9 @@ HostEntry_get_network_address(HostEntry *self, PyObject *args, PyObject *kwds)
 
 static PyMethodDef
 HostEntry_methods[] = {
-    {"get_network_addresses", (PyCFunction)HostEntry_get_network_addresses, METH_VARARGS|METH_KEYWORDS, HostEntry_get_network_addresses_doc},
-    {"get_network_address",   (PyCFunction)HostEntry_get_network_address,   METH_VARARGS|METH_KEYWORDS, HostEntry_get_network_address_doc},
-    {NULL, NULL}  /* Sentinel */
+    {"get_network_addresses", (PyCFunction)(void(*)(void))HostEntry_get_network_addresses, METH_VARARGS|METH_KEYWORDS, HostEntry_get_network_addresses_doc},
+    {"get_network_address",   (PyCFunction)(void(*)(void))HostEntry_get_network_address,   METH_VARARGS|METH_KEYWORDS, HostEntry_get_network_address_doc},
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 /* =========================== Class Construction =========================== */
@@ -1575,7 +1581,7 @@ Socket_get_desc_type(Socket *self, void *closure)
     TraceMethodEnter(self);
 
     if (!self->pr_socket) {
-        PyErr_SetString(PyExc_ValueError, "socket not intialized");
+        PyErr_SetString(PyExc_ValueError, "socket not initialized");
         return NULL;
     }
 
@@ -2144,7 +2150,7 @@ newly created Socket and NetworkAddress objects for the peer as well\n\
 as a buffer of data.\n\
 \n\
 Socket.accept_read() returns a tuple containing a new Socket object, a\n\
-new Networkaddress object for the peer, and a bufer containing data\n\
+new Networkaddress object for the peer, and a buffer containing data\n\
 from the first read on the Socket object.\n\
 ");
 
@@ -2383,7 +2389,7 @@ protocols require <CR><LF> sequences in some parts of the protocol\n\
 stream but permit <LF> (e.g. newline) endings in encapsulated portions\n\
 of the protocol. It is up to the caller to make line endings canonical\n\
 or to strip them altogether if necessary for their application. Both\n\
-operations are trival and not considered a burden in light of the need\n\
+operations are trivial and not considered a burden in light of the need\n\
 to read exact protocol sequences.\n\
 ");
 
@@ -2621,7 +2627,7 @@ _recv(Socket *self, long requested_amount, unsigned int timeout)
             return py_buf;
         }
 
-        /* We'll completly empty the read ahead buffer satisfying this request so malloc
+        /* We'll completely empty the read ahead buffer satisfying this request so malloc
          * the result string now, copy the read ahead portion into it and then free the
          * read ahead. By eschewing the read ahead until it's needed again saves us an
          * extra buffer copy on each subsequent read until it's needed again. */
@@ -2827,17 +2833,10 @@ Socket_send(Socket *self, PyObject *args, PyObject *kwds)
 
     TraceMethodEnter(self);
 
-#if PY_MAJOR_VERSION >= 3
     // Py3 uses y# for bytes parameter
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "y#|I:send", kwlist,
                                      &buf, &len, &timeout))
         return NULL;
-#else
-    // Py2 uses s# for string parameter
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#|I:send", kwlist,
-                                     &buf, &len, &timeout))
-        return NULL;
-#endif
 
     Py_BEGIN_ALLOW_THREADS
     amount = PR_Send(self->pr_socket, buf, len, 0, timeout);
@@ -2877,17 +2876,10 @@ Socket_sendall(Socket *self, PyObject *args, PyObject *kwds)
 
     TraceMethodEnter(self);
 
-#if PY_MAJOR_VERSION >= 3
     // Py3 uses y# for bytes parameter
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "y#|I:sendall", kwlist,
                                      &buf, &len, &timeout))
         return NULL;
-#else
-    // Py2 uses s# for string parameter
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#|I:sendall", kwlist,
-                                     &buf, &len, &timeout))
-        return NULL;
-#endif
 
     Py_BEGIN_ALLOW_THREADS
     amount = PR_Send(self->pr_socket, buf, len, 0, timeout);
@@ -2932,17 +2924,10 @@ Socket_send_to(Socket *self, PyObject *args, PyObject *kwds)
 
     TraceMethodEnter(self);
 
-#if PY_MAJOR_VERSION >= 3
     // Py3 uses y# for bytes parameter
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "y#O!|I:send_to", kwlist,
                                      &buf, &len, &NetworkAddressType, &py_netaddr, &timeout))
         return NULL;
-#else
-    // Py2 uses s# for string parameter
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "s#O!|I:send_to", kwlist,
-                                     &buf, &len, &NetworkAddressType, &py_netaddr, &timeout))
-        return NULL;
-#endif
 
     SOCKET_CHECK_FAMILY(py_netaddr);
 
@@ -3265,31 +3250,31 @@ static PyMethodDef
 Socket_methods[] = {
     {"set_socket_option", (PyCFunction)Socket_set_socket_option, METH_VARARGS,               Socket_set_socket_option_doc},
     {"get_socket_option", (PyCFunction)Socket_get_socket_option, METH_VARARGS,               Socket_get_socket_option_doc},
-    {"connect",           (PyCFunction)Socket_connect,           METH_VARARGS|METH_KEYWORDS, Socket_connect_doc},
-    {"accept",            (PyCFunction)Socket_accept,            METH_VARARGS|METH_KEYWORDS, Socket_accept_doc},
-    {"accept_read",       (PyCFunction)Socket_accept_read,       METH_VARARGS|METH_KEYWORDS, Socket_accept_read_doc},
+    {"connect",           (PyCFunction)(void(*)(void))Socket_connect,           METH_VARARGS|METH_KEYWORDS, Socket_connect_doc},
+    {"accept",            (PyCFunction)(void(*)(void))Socket_accept,            METH_VARARGS|METH_KEYWORDS, Socket_accept_doc},
+    {"accept_read",       (PyCFunction)(void(*)(void))Socket_accept_read,       METH_VARARGS|METH_KEYWORDS, Socket_accept_read_doc},
     {"bind",              (PyCFunction)Socket_bind,              METH_VARARGS,               Socket_bind_doc},
-    {"listen",            (PyCFunction)Socket_listen,            METH_VARARGS|METH_KEYWORDS, Socket_listen_doc},
-    {"shutdown",          (PyCFunction)Socket_shutdown,          METH_VARARGS|METH_KEYWORDS, Socket_shutdown_doc},
-    {"close"   ,          (PyCFunction)Socket_close,             METH_NOARGS,                Socket_close_doc},
-    {"recv",              (PyCFunction)Socket_recv,              METH_VARARGS|METH_KEYWORDS, Socket_recv_doc},
-    {"read",              (PyCFunction)Socket_read,              METH_VARARGS|METH_KEYWORDS, Socket_read_doc},
-    {"readline",          (PyCFunction)Socket_readline,          METH_VARARGS|METH_KEYWORDS, Socket_readline_doc},
-    {"readlines",         (PyCFunction)Socket_readlines,         METH_VARARGS|METH_KEYWORDS, Socket_readlines_doc},
-    {"recv_from",         (PyCFunction)Socket_recv_from,         METH_VARARGS|METH_KEYWORDS, Socket_recv_from_doc},
-    {"send",              (PyCFunction)Socket_send,              METH_VARARGS|METH_KEYWORDS, Socket_send_doc},
-    {"sendall",           (PyCFunction)Socket_sendall,           METH_VARARGS|METH_KEYWORDS, Socket_sendall_doc},
-    {"send_to",           (PyCFunction)Socket_send_to,           METH_VARARGS|METH_KEYWORDS, Socket_send_to_doc},
-    {"get_sock_name",     (PyCFunction)Socket_get_sock_name,     METH_NOARGS,                Socket_get_sock_name_doc},
-    {"get_peer_name",     (PyCFunction)Socket_get_peer_name,     METH_NOARGS,                Socket_get_peer_name_doc},
-    {"fileno",            (PyCFunction)Socket_fileno,            METH_NOARGS,                Socket_fileno_doc},
+    {"listen",            (PyCFunction)(void(*)(void))Socket_listen,            METH_VARARGS|METH_KEYWORDS, Socket_listen_doc},
+    {"shutdown",          (PyCFunction)(void(*)(void))Socket_shutdown,          METH_VARARGS|METH_KEYWORDS, Socket_shutdown_doc},
+    {"close"   ,          (PyCFunction)(void(*)(void))Socket_close,             METH_NOARGS,                Socket_close_doc},
+    {"recv",              (PyCFunction)(void(*)(void))Socket_recv,              METH_VARARGS|METH_KEYWORDS, Socket_recv_doc},
+    {"read",              (PyCFunction)(void(*)(void))Socket_read,              METH_VARARGS|METH_KEYWORDS, Socket_read_doc},
+    {"readline",          (PyCFunction)(void(*)(void))Socket_readline,          METH_VARARGS|METH_KEYWORDS, Socket_readline_doc},
+    {"readlines",         (PyCFunction)(void(*)(void))Socket_readlines,         METH_VARARGS|METH_KEYWORDS, Socket_readlines_doc},
+    {"recv_from",         (PyCFunction)(void(*)(void))Socket_recv_from,         METH_VARARGS|METH_KEYWORDS, Socket_recv_from_doc},
+    {"send",              (PyCFunction)(void(*)(void))Socket_send,              METH_VARARGS|METH_KEYWORDS, Socket_send_doc},
+    {"sendall",           (PyCFunction)(void(*)(void))Socket_sendall,           METH_VARARGS|METH_KEYWORDS, Socket_sendall_doc},
+    {"send_to",           (PyCFunction)(void(*)(void))Socket_send_to,           METH_VARARGS|METH_KEYWORDS, Socket_send_to_doc},
+    {"get_sock_name",     (PyCFunction)(void(*)(void))Socket_get_sock_name,     METH_NOARGS,                Socket_get_sock_name_doc},
+    {"get_peer_name",     (PyCFunction)(void(*)(void))Socket_get_peer_name,     METH_NOARGS,                Socket_get_peer_name_doc},
+    {"fileno",            (PyCFunction)(void(*)(void))Socket_fileno,            METH_NOARGS,                Socket_fileno_doc},
 #ifndef NO_DUP
     {"makefile",          (PyCFunction)Socket_makefile,          METH_VARARGS,               Socket_makefile_doc},
 #endif
-    {"new_tcp_pair",      (PyCFunction)Socket_new_tcp_pair,      METH_NOARGS|METH_STATIC,    Socket_new_tcp_pair_doc},
+    {"new_tcp_pair",      (PyCFunction)(void(*)(void))Socket_new_tcp_pair,      METH_NOARGS|METH_STATIC,    Socket_new_tcp_pair_doc},
     {"poll"        ,      (PyCFunction)Socket_poll,              METH_VARARGS|METH_STATIC,   Socket_poll_doc},
     {"import_tcp_socket", (PyCFunction)Socket_import_tcp_socket, METH_VARARGS|METH_STATIC,   Socket_import_tcp_socket_doc},
-    {NULL, NULL}  /* Sentinel */
+    {NULL, NULL, 0, NULL}  /* Sentinel */
 };
 
 /* =========================== Class Construction =========================== */
@@ -3816,8 +3801,6 @@ PyDoc_STRVAR(module_doc,
 \n\
 ");
 
-#if PY_MAJOR_VERSION >= 3
-
 static struct PyModuleDef module_def = {
     PyModuleDef_HEAD_INIT,
     NSS_IO_MODULE_NAME,         /* m_name */
@@ -3830,9 +3813,6 @@ static struct PyModuleDef module_def = {
     NULL                        /* m_free */
 };
 
-#else /* PY_MAOR_VERSION < 3 */
-#endif /* PY_MAJOR_VERSION */
-
 MOD_INIT(io)
 {
     PyObject *m;
@@ -3840,11 +3820,7 @@ MOD_INIT(io)
     if (import_nspr_error_c_api() < 0)
         return MOD_ERROR_VAL;
 
-#if PY_MAJOR_VERSION >= 3
     m = PyModule_Create(&module_def);
-#else
-    m = Py_InitModule3(NSS_IO_MODULE_NAME, module_methods, module_doc);
-#endif
 
     if (m == NULL) {
         return MOD_ERROR_VAL;
