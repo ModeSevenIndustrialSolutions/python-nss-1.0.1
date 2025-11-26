@@ -1,3 +1,7 @@
+/* SPDX-License-Identifier: MPL-2.0
+ * SPDX-FileCopyrightText: Copyright (c) 2010-2025 python-nss-ng contributors
+ */
+
 #include "frameobject.h"
 
 /*
