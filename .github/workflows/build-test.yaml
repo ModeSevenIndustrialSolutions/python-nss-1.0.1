@@ -55,7 +55,7 @@ jobs:
       - name: 'Extract Python project metadata'
         id: metadata
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/build-metadata-action@07c18bd2e24f25d2887592094427a198cfb85aae  # v0.1.0
+        uses: lfreleng-actions/build-metadata-action@c8d6f8396301edd325ac90db463850048f5fe20c  # v0.1.1
         with:
           path_prefix: '.'
           output_format: summary
@@ -99,7 +99,7 @@ jobs:
       - name: "Build Python project ${{ matrix.python-version }}"
         id: python-build
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-build-action@7f4c0b732b54dbc356981892b308b718ad839feb  # v1.0.0
+        uses: lfreleng-actions/python-build-action@57967a0bef5647e300f70bb24f5667f55b409fed  # v1.0.1
         with:
           artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}
           python_version: ${{ matrix.python-version }}
@@ -143,7 +143,7 @@ jobs:
       - name: "Build Python project ${{ matrix.python-version }}"
         id: python-build
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-build-action@7f4c0b732b54dbc356981892b308b718ad839feb  # v1.0.0
+        uses: lfreleng-actions/python-build-action@57967a0bef5647e300f70bb24f5667f55b409fed  # v1.0.1
         with:
           artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}
           python_version: ${{ matrix.python-version }}
