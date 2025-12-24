@@ -730,7 +730,7 @@ jobs:
 
       - name: 'Attach build artefacts to release'
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/release-assets-action@34a4887ec24e0f9ff358a872beb69394683079a6  # v0.1.0
+        uses: lfreleng-actions/release-assets-action@985ecd2ba521dde165514af406dd114d3db5dab6  # v0.1.0
         with:
           asset_paths: '["dist/**"]'
           release_tag: "${{ needs.tag-validate.outputs.tag }}"
