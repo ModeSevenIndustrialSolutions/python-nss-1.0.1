@@ -146,7 +146,7 @@ jobs:
       - name: 'Extract Python project metadata'
         id: metadata
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/build-metadata-action@82adfb8d227c85eb4bcbc0a71242d031f459462e  # v0.1.1
+        uses: lfreleng-actions/build-metadata-action@c8d6f8396301edd325ac90db463850048f5fe20c # v0.1.1
         with:
           path_prefix: '.'
           output_format: summary
@@ -186,7 +186,7 @@ jobs:
       - name: "Build source distribution"
         id: python-build-sdist
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-build-action@7f4c0b732b54dbc356981892b308b718ad839feb  # v1.0.0
+        uses: lfreleng-actions/python-build-action@8f567398591014dd5627961aaa9ec17816b072f0 # v1.0.2
         with:
           artefact_name: python-nss-ng-sdist
           build_formats: sdist
@@ -216,23 +216,15 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
-        run: |
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
-
       - name: "Build Python project ${{ matrix.python-version }}"
         id: python-build
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-build-action@7f4c0b732b54dbc356981892b308b718ad839feb  # v1.0.0
+        uses: lfreleng-actions/python-build-action@8f567398591014dd5627961aaa9ec17816b072f0 # v1.0.2
         with:
           artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}
           python_version: ${{ matrix.python-version }}
+          make: true
+          make_args: 'deps-nss env-github-actions'
           build_formats: wheel
           auditwheel: true
           manylinux_version: manylinux_2_38
@@ -263,23 +255,15 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
-        run: |
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
-
       - name: "Build Python project ${{ matrix.python-version }}"
         id: python-build
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-build-action@7f4c0b732b54dbc356981892b308b718ad839feb  # v1.0.0
+        uses: lfreleng-actions/python-build-action@8f567398591014dd5627961aaa9ec17816b072f0 # v1.0.2
         with:
           artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}
           python_version: ${{ matrix.python-version }}
+          make: true
+          make_args: 'deps-nss env-github-actions'
           build_formats: wheel
           auditwheel: true
           manylinux_version: manylinux_2_38
@@ -306,26 +290,17 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
+      - name: Build NSS/NSPR and install dependencies
         run: |
-            # Install meson/ninja for editable installs
-            sudo apt-get update
-            sudo apt-get install -y meson ninja-build
-
-            chmod +x .github/scripts/install-nss.sh
-            ./.github/scripts/install-nss.sh
-
-            # Set environment variables for subsequent steps
-            echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-              >> "$GITHUB_ENV"
-            echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+            make deps-nss deps-test env-github-actions
 
       - name: "Python tests [pytest] ${{ matrix.python-version }}"
         # yamllint disable-line rule:line-length
         uses: lfreleng-actions/python-test-action@92d4110d44ebc18fa4575c6b00203ff67d01a1cb  # v1.0.1
         with:
           python_version: ${{ matrix.python-version }}
-          artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}
+          # yamllint disable-line rule:line-length
+          artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}-coverage
           report_artefact: 'true'
 
   python-tests-arm64:
@@ -348,26 +323,17 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
+      - name: Build NSS/NSPR and install dependencies
         run: |
-            # Install meson/ninja for editable installs
-            sudo apt-get update
-            sudo apt-get install -y meson ninja-build
-
-            chmod +x .github/scripts/install-nss.sh
-            ./.github/scripts/install-nss.sh
-
-            # Set environment variables for subsequent steps
-            echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-              >> "$GITHUB_ENV"
-            echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+          make deps-nss deps-test env-github-actions
 
       - name: "Python tests [pytest] ${{ matrix.python-version }}"
         # yamllint disable-line rule:line-length
         uses: lfreleng-actions/python-test-action@92d4110d44ebc18fa4575c6b00203ff67d01a1cb  # v1.0.1
         with:
           python_version: ${{ matrix.python-version }}
-          artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}
+          # yamllint disable-line rule:line-length
+          artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}-coverage
           report_artefact: 'true'
 
   python-audit-x64:
@@ -390,23 +356,13 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
+      - name: Build NSS/NSPR and install dependencies
         run: |
-          # Install meson/ninja for editable installs
-          sudo apt-get update
-          sudo apt-get install -y meson ninja-build
-
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+            make deps-nss deps-test env-github-actions
 
       - name: "Audit dependencies ${{ matrix.python-version }}"
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-audit-action@e607f187734d18c6ab2cdff3dd2db91840aae07a  # v0.2.4
+        uses: lfreleng-actions/python-audit-action@ec8d84ca14c0413a2b2c6612a3e15b9803f9de75 # v0.2.5
         with:
           python_version: "${{ matrix.python-version }}"
           artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}
@@ -431,23 +387,13 @@ jobs:
       # yamllint disable-line rule:line-length
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
 
-      - name: Build NSS/NSPR from source
+      - name: Build NSS/NSPR and install dependencies
         run: |
-          # Install meson/ninja for editable installs
-          sudo apt-get update
-          sudo apt-get install -y meson ninja-build
-
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+          make deps-nss deps-test env-github-actions
 
       - name: "Audit dependencies ${{ matrix.python-version }}"
         # yamllint disable-line rule:line-length
-        uses: lfreleng-actions/python-audit-action@e607f187734d18c6ab2cdff3dd2db91840aae07a  # v0.2.4
+        uses: lfreleng-actions/python-audit-action@ec8d84ca14c0413a2b2c6612a3e15b9803f9de75 # v0.2.5
         with:
           python_version: "${{ matrix.python-version }}"
           artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}
@@ -471,13 +417,7 @@ jobs:
 
       - name: Build NSS/NSPR from source
         run: |
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+          make deps-nss env-github-actions
 
       - name: "Generate SBOM"
         id: sbom
@@ -557,13 +497,7 @@ jobs:
 
       - name: Build NSS/NSPR from source
         run: |
-          chmod +x .github/scripts/install-nss.sh
-          ./.github/scripts/install-nss.sh
-
-          # Set environment variables for subsequent steps
-          echo "PKG_CONFIG_PATH=/usr/lib/pkgconfig:$PKG_CONFIG_PATH" \
-            >> "$GITHUB_ENV"
-          echo "LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH" >> "$GITHUB_ENV"
+          make deps-nss env-github-actions
 
       - name: "Generate SBOM"
         id: sbom
