@@ -10,7 +10,7 @@ requires = [
 build-backend = "mesonpy"
 
 [project]
-name = "python-nss"
+name = "python-nss-ng"
 version = "1.0.1"
 description = "Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)"
 readme = "README.md"
