@@ -76,16 +76,19 @@ This project uses multiple GitHub Actions workflows for different purposes:
 across different platforms and distributions.
 
 **What it tests:**
+
 - Fedora Linux (x86_64 and aarch64) with NSS 3.117+
 - macOS (Apple Silicon) with Homebrew NSS/NSPR
 - Python versions: 3.10, 3.11, 3.12, 3.14 (Linux), 3.10-3.14 (macOS)
 
 **When it runs:**
+
 - On pull requests
 - On push to `main`, `master`, or `develop` branches
 - Manual workflow dispatch
 
 **Use cases:**
+
 - Verifying compatibility with newer NSS versions
 - Testing system package integration (for distro maintainers)
 - Validating macOS Homebrew builds
@@ -97,6 +100,7 @@ across different platforms and distributions.
 security scanning, and quality checks.
 
 **What it includes:**
+
 - **Build jobs:** Creates manylinux_2_38 wheels for x86_64 and aarch64
 - **Test jobs:** Runs pytest with coverage reporting
 - **Audit jobs:** Security auditing with pip-audit
@@ -104,10 +108,12 @@ security scanning, and quality checks.
 - **Security scanning:** Grype vulnerability scanning
 
 **When it runs:**
+
 - On pull requests to `main` or `master`
 - Manual workflow dispatch (with optional cache clearing)
 
 **Artifacts generated:**
+
 - Python wheels (`.whl` files) - manylinux compatible
 - Coverage reports (XML and HTML)
 - SBOM files (JSON and XML)
@@ -120,9 +126,11 @@ security scanning, and quality checks.
 **Purpose:** Automated release process for publishing to PyPI.
 
 **When it runs:**
+
 - On tag push (e.g., `v1.0.2`)
 
 **What it does:**
+
 - Validates tag and version
 - Builds wheels and source distribution for all platforms
 - Runs all tests and audits
@@ -133,12 +141,13 @@ security scanning, and quality checks.
 - Promotes draft release to published
 
 **Credentials required:**
+
 - `TEST_PYPI_CREDENTIAL` (GitHub secret)
 - `PYPI_CREDENTIAL` (GitHub secret)
 
 ### Understanding the Workflows
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │ Pull Request Opened                                         │
 └───────────┬─────────────────────────────────────────────────┘
@@ -205,6 +214,7 @@ pytest test/ -v -n auto
 ### Pull Request Process
 
 1. **Create a feature branch:**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -216,15 +226,18 @@ pytest test/ -v -n auto
    - Update documentation as needed
 
 3. **Test locally:**
+
    ```bash
    pytest test/ -v
    make lint  # Run code quality checks
    ```
 
 4. **Push and create PR:**
+
    ```bash
    git push origin feature/your-feature-name
    ```
+
    - Open a pull request on GitHub
    - Fill out the PR template
    - Link related issues
@@ -241,7 +254,7 @@ pytest test/ -v -n auto
 
 ### Commit Message Guidelines
 
-```
+```text
 type(scope): Brief description (50 chars or less)
 
 More detailed explanation if needed (wrap at 72 characters).
@@ -252,6 +265,7 @@ Fixes #123
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -317,10 +331,12 @@ Releases are handled automatically via `build-test-release.yaml`:
 2. Update `src/__init__.py` `__version__`
 3. Update `doc/ChangeLog`
 4. Create and push annotated tag:
+
    ```bash
    git tag -s v1.0.2 -m "Release 1.0.2"
    git push origin v1.0.2
    ```
+
 5. Workflow automatically builds, tests, and publishes to PyPI
 6. Workflow creates GitHub release with artifacts
 
