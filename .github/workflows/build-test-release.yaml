@@ -325,7 +325,8 @@ jobs:
         uses: lfreleng-actions/python-test-action@92d4110d44ebc18fa4575c6b00203ff67d01a1cb  # v1.0.1
         with:
           python_version: ${{ matrix.python-version }}
-          artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}
+          # yamllint disable-line rule:line-length
+          artefact_name: python-nss-ng-x64-py${{ matrix.python-version }}-coverage
           report_artefact: 'true'
 
   python-tests-arm64:
@@ -367,7 +368,8 @@ jobs:
         uses: lfreleng-actions/python-test-action@92d4110d44ebc18fa4575c6b00203ff67d01a1cb  # v1.0.1
         with:
           python_version: ${{ matrix.python-version }}
-          artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}
+          # yamllint disable-line rule:line-length
+          artefact_name: python-nss-ng-arm64-py${{ matrix.python-version }}-coverage
           report_artefact: 'true'
 
   python-audit-x64:
