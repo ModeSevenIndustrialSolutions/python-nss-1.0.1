@@ -266,17 +266,9 @@ jobs:
                 echo "Checking sys.path:"
                 $PYTHON_PATH -c "import sys; print('\n'.join(sys.path))"
                 echo ""
-                echo "Trying to import with detailed error:"
-                $PYTHON_PATH -c "
-                import sys
-                import traceback
-                try:
-                    import nss.error
-                    print('SUCCESS: nss.error imported')
-                except Exception as e:
-                    print('FAILED: ' + type(e).__name__ + ': ' + str(e))
-                    traceback.print_exc()
-                "
+                echo "Trying to import nss.error:"
+                $PYTHON_PATH -c "import nss.error; print('SUCCESS')" \
+                  2>&1 || true
             else
                 echo "Python not found at $PYTHON_PATH, trying python3.12"
                 which python3.12 && \
@@ -452,17 +444,9 @@ jobs:
                 echo "Checking sys.path:"
                 $PYTHON_PATH -c "import sys; print('\n'.join(sys.path))"
                 echo ""
-                echo "Trying to import with detailed error:"
-                $PYTHON_PATH -c "
-                import sys
-                import traceback
-                try:
-                    import nss.error
-                    print('SUCCESS: nss.error imported')
-                except Exception as e:
-                    print('FAILED: ' + type(e).__name__ + ': ' + str(e))
-                    traceback.print_exc()
-                "
+                echo "Trying to import nss.error:"
+                $PYTHON_PATH -c "import nss.error; print('SUCCESS')" \
+                  2>&1 || true
             else
                 echo "Python not found at $PYTHON_PATH, trying python3.12"
                 which python3.12 && \
