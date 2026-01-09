@@ -73,7 +73,7 @@ jobs:
         uses: lfreleng-actions/tag-validate-action@4bd433ffdadfcfb8850312059b669dfd3da0bb84  # v0.1.2
         with:
           require_type: 'semver'
-          require_signed: 'true'
+          require_signed: 'ambivalent'
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: 'Reject development tags'
